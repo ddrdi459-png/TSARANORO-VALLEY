@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administration — Tsaranoro Guide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+<div id="loginBox" class="admin-login">
+  <div class="login-logo">🌿</div>
+  <h1>TSARANORO</h1><p>Administration sécurisée</p>
+  <input id="adminUser" placeholder="Identifiant" autocomplete="username">
+  <input id="adminPass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+  <button class="btn" onclick="login()">Se connecter</button>
+  <small>Accès administrateur uniquement</small>
+</div>
+
+<div id="panel" hidden>
+<header class="admin-header">
+  <div><b>🌿 TSARANORO ADMIN</b><small>Gestion complète du site</small></div>
+  <div class="admin-actions"><a class="btn light" href="index.html">Voir le site</a><button class="btn danger" onclick="logout()">Déconnexion</button></div>
+</header>
+<main class="admin-main">
+  <div class="stats" id="stats"></div><div class="admin-note">ℹ️ Dans cette version, les modifications faites depuis l'administration sont enregistrées dans le navigateur utilisé pour administrer le site.</div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="circuits">🥾 Circuits</button>
+    <button class="tab" data-tab="activities">🏄 Activités</button>
+    <button class="tab" data-tab="hotels">🏨 Hôtels</button>
+    <button class="tab" data-tab="reservations">📅 Réservations</button>
+    <button class="tab" data-tab="videos">🎥 Vidéos</button>
+  </nav>
+
+  <section id="circuits" class="admin-section">
+    <div class="section-title"><div><h2>Circuits</h2><p>Ajouter, modifier, supprimer et gérer les photos.</p></div><button class="btn" onclick="newCircuit()">＋ Nouveau circuit</button></div>
+    <div id="circuitList" class="admin-grid"></div>
+    <form id="circuitForm" class="editor" hidden>
+      <h3 id="circuitFormTitle">Nouveau circuit</h3><input type="hidden" id="editId">
+      <div class="form-grid">
+        <input id="cName" required placeholder="Nom du circuit"><input id="cDuration" placeholder="Durée">
+        <select id="cDifficulty"><option value="hard">🔴 Difficile</option><option value="medium">🟡 Assez facile</option><option value="easy">🟢 Facile</option><option value="unknown">⚪ À compléter</option></select>
+        <input id="cPrice" placeholder="Prix (privé / admin)">
+      </div>
+      <textarea id="cDesc" placeholder="Description"></textarea><textarea id="cItinerary" placeholder="Itinéraire / trek"></textarea><textarea id="cPoints" placeholder="Points importants"></textarea>
+      <label class="upload">📸 Photos du circuit <input id="cPhotos" type="file" accept="image/*" multiple></label>
+      <div id="photoPreview" class="photo-manager"></div>
+      <div class="editor-actions"><button class="btn" type="submit">💾 Enregistrer</button><button class="btn light" type="button" onclick="closeEditors()">Annuler</button></div>
+    </form>
+  </section>
+
+  <section id="activities" class="admin-section" hidden>
+    <div class="section-title"><div><h2>Activités & matériel</h2><p>Parapente, Escalade, Canoë et autres activités. Ces informations sont publiées sur le site public.</p></div><button class="btn" onclick="newActivity()">＋ Nouvelle activité</button></div>
+    <div id="activityList" class="admin-grid"></div>
+    <form id="activityForm" class="editor" hidden>
+      <h3 id="activityFormTitle">Nouvelle activité</h3><input type="hidden" id="aId">
+      <div class="form-grid"><input id="aName" required placeholder="Nom de l'activité"><input id="aDuration" placeholder="Durée"><input id="aPrice" placeholder="Prix"><input id="aDifficulty" placeholder="Difficulté"></div>
+      <textarea id="aDesc" placeholder="Description"></textarea><textarea id="aTrek" placeholder="Trek / parcours"></textarea><textarea id="aEquipment" placeholder="Matériel nécessaire"></textarea>
+      <label class="upload">📸 Photo <input id="aPhoto" type="file" accept="image/*"></label><div id="aPhotoPreview" class="photo-manager"></div>
+      <div class="editor-actions"><button class="btn" type="submit">💾 Enregistrer</button><button class="btn light" type="button" onclick="closeEditors()">Annuler</button></div>
+    </form>
+  </section>
+
+  <section id="hotels" class="admin-section" hidden>
+    <div class="section-title"><div><h2>Hôtels / Hébergements</h2><p>Gérer les hébergements recommandés.</p></div><button class="btn" onclick="newHotel()">＋ Nouvel hôtel</button></div>
+    <div id="hotelList" class="admin-grid"></div>
+    <form id="hotelForm" class="editor" hidden>
+      <h3 id="hotelFormTitle">Nouvel hôtel</h3><input type="hidden" id="hId">
+      <div class="form-grid"><input id="hName" required placeholder="Nom de l'hôtel"><input id="hLocation" placeholder="Localisation"><input id="hPhone" placeholder="Téléphone"><input id="hUrl" placeholder="Site web"><input id="hLogo" placeholder="Lien du logo (URL ou fichier)" required></div>
+      <textarea id="hDesc" placeholder="Description"></textarea><textarea id="hServices" placeholder="Services"></textarea>
+      <label class="upload">📸 Photos <input id="hPhotos" type="file" accept="image/*" multiple></label><div id="hPhotoPreview" class="photo-manager"></div>
+      <div class="editor-actions"><button class="btn" type="submit">💾 Enregistrer</button><button class="btn light" type="button" onclick="closeEditors()">Annuler</button></div>
+    </form>
+  </section>
+
+  <section id="reservations" class="admin-section" hidden>
+    <div class="section-title"><div><h2>Réservations</h2><p>Consulter et gérer les demandes reçues.</p></div></div>
+    <div id="reservationList" class="reservation-list"></div>
+  </section>
+
+
+  <section id="videos" class="admin-section" hidden>
+    <div class="section-title"><div><h2>🎥 Gestion des vidéos</h2><p>Ajouter des vidéos MP4 locales. Elles seront enregistrées dans ce navigateur et affichables sur le site public.</p></div><button class="btn" onclick="newVideo()">＋ Nouvelle vidéo</button></div>
+    <div class="admin-note">⚠️ Version actuelle : les vidéos ajoutées ici sont stockées dans le navigateur (localStorage). Pour qu'elles soient visibles par tous les visiteurs après un déploiement, l'étape suivante sera Supabase Storage.</div>
+    <div id="videoList" class="admin-grid"></div>
+    <form id="videoForm" class="editor" hidden>
+      <h3 id="videoFormTitle">Nouvelle vidéo</h3><input type="hidden" id="vId">
+      <div class="form-grid"><input id="vTitle" required placeholder="Titre de la vidéo"><input id="vOrder" type="number" min="0" value="0" placeholder="Ordre"></div>
+      <textarea id="vDesc" placeholder="Description de la vidéo"></textarea>
+      <label class="upload">🎬 Fichier vidéo MP4 <input id="vFile" type="file" accept="video/mp4,video/webm,video/quicktime"></label>
+      <div id="vFileInfo" class="admin-note"></div>
+      <div id="vPreview" class="video-preview"></div>
+      <div class="editor-actions"><button class="btn" type="submit">💾 Enregistrer</button><button class="btn light" type="button" onclick="closeEditors()">Annuler</button></div>
+    </form>
+  </section>
+
+</main>
+</div>
+<script src="admin.js"></script>
+</body></html>
