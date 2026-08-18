@@ -25,4 +25,27 @@
 <section id="videos" class="admin-section" hidden><div class="section-title"><div><h2>🎥 Vidéos</h2><p>Publier des vidéos dans Supabase Storage pour les visiteurs.</p></div><button class="btn" onclick="newVideo()">＋ Nouvelle vidéo</button></div><div class="admin-note">☁️ Les vidéos sont stockées dans le bucket Supabase « tsaranoro media » et enregistrées dans la galerie.</div><div id="videoList" class="admin-grid"></div><form id="videoForm" class="editor" hidden><h3>Nouvelle vidéo</h3><input type="hidden" id="vId"><input id="vTitle" required placeholder="Titre de la vidéo"><textarea id="vDesc" placeholder="Description"></textarea><label class="upload">🎬 Fichier vidéo <input id="vFile" type="file" accept="video/*"></label><div id="vPreview" class="video-preview"></div><div class="editor-actions"><button class="btn" type="submit">💾 Publier</button><button class="btn light" type="button" onclick="closeEditors()">Annuler</button></div></form></section>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script src="admin-supabase.js"></script>
+<script>
+// Interface: identifiant "admin". L'authentification réelle reste Supabase.
+const ADMIN_LOGIN_ID='admin';
+const ADMIN_LOGIN_EMAIL='tsaranoro.admin@gmail.com';
+async function login(){
+  const id=document.getElementById('adminId').value.trim();
+  const password=document.getElementById('adminPass').value;
+  const box=document.getElementById('loginError'); box.hidden=true;
+  if(!id||!password){box.textContent='Entrez votre identifiant et votre mot de passe.';box.hidden=false;return;}
+  if(id!==ADMIN_LOGIN_ID){box.textContent='Identifiant administrateur incorrect.';box.hidden=false;return;}
+  const {error}=await supabase.auth.signInWithPassword({email:ADMIN_LOGIN_EMAIL,password});
+  if(error){box.textContent='Identifiant ou mot de passe incorrect.';box.hidden=false;return;}
+  const {data:{user}}=await supabase.auth.getUser();
+  if(!user||user.id!==window.TSARANORO_ADMIN_UID){await supabase.auth.signOut();box.textContent='Compte non autorisé.';box.hidden=false;return;}
+  if(typeof showPanel==='function')showPanel();
+}
+async function resetPassword(){
+  const box=document.getElementById('loginError');
+  const {error}=await supabase.auth.resetPasswordForEmail(ADMIN_LOGIN_EMAIL,{redirectTo:location.href});
+  if(error){box.textContent=error.message;box.hidden=false;return;}
+  alert('Un email de récupération a été envoyé à l’adresse administrateur.');
+}
+</script>
 </body></html>
