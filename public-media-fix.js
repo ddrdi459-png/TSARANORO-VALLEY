@@ -9,40 +9,39 @@
     if (clean.startsWith('media/')) return STORAGE_BASE + clean;
     return s;
   };
-
-  function repairCircuits() {
+  function repair(key, fieldOrPhotos) {
     try {
-      const key = 'tsaranoro_circuits_v2';
-      const raw = localStorage.getItem(key);
-      if (!raw) return false;
-      const data = JSON.parse(raw);
-      if (!Array.isArray(data)) return false;
+      const raw = localStorage.getItem(key); if (!raw) return false;
+      const data = JSON.parse(raw); if (!Array.isArray(data)) return false;
       let changed = false;
-      data.forEach(c => {
-        if (Array.isArray(c.photos)) {
-          const next = c.photos.map(toPublicUrl);
-          if (JSON.stringify(next) !== JSON.stringify(c.photos)) { c.photos = next; changed = true; }
-        }
-        if (c.image_url) {
-          const next = toPublicUrl(c.image_url);
-          if (next !== c.image_url) { c.image_url = next; changed = true; }
+      data.forEach(item => {
+        if (fieldOrPhotos === 'photos' && Array.isArray(item.photos)) {
+          const next = item.photos.map(toPublicUrl);
+          if (JSON.stringify(next) !== JSON.stringify(item.photos)) { item.photos = next; changed = true; }
+        } else if (fieldOrPhotos && item[fieldOrPhotos]) {
+          const next = toPublicUrl(item[fieldOrPhotos]);
+          if (next !== item[fieldOrPhotos]) { item[fieldOrPhotos] = next; changed = true; }
         }
       });
       if (changed) localStorage.setItem(key, JSON.stringify(data));
       return changed;
-    } catch (e) {
-      console.warn('Public media URL repair:', e);
-      return false;
+    } catch (e) { console.warn('Public media URL repair:', e); return false; }
+  }
+  function run() {
+    const changed = repair('tsaranoro_circuits_v2','photos') ||
+      repair('tsaranoro_circuits_v2','image_url') ||
+      repair('tsaranoro_activities_v1','photo') ||
+      repair('tsaranoro_guides_v1','photo') ||
+      repair('tsaranoro_hotels_v1','photo');
+    if (changed) {
+      if (typeof window.render === 'function') window.render();
+      if (typeof window.renderActivities === 'function') window.renderActivities();
+      if (typeof window.renderGuides === 'function') window.renderGuides();
+      if (typeof window.renderHotels === 'function') window.renderHotels();
     }
   }
-
-  const run = () => {
-    const changed = repairCircuits();
-    if (changed && typeof window.render === 'function') window.render();
-  };
-
   run();
   window.addEventListener('load', run);
-  setTimeout(run, 300);
-  setTimeout(run, 1500);
+  [300,1500,3000,5000].forEach(ms => setTimeout(run, ms));
+  setInterval(run, 2000);
 })();
